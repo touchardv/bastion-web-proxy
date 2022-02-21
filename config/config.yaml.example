@@ -1,0 +1,21 @@
+httpServer:
+    address: 127.0.0.1
+    port: 8080
+    pacFile: proxy.pac
+sshProxies:
+  - name: foo
+    host: foo.com
+    socks5Port: 1080
+    username: mrfoo
+
+  - name: bar
+    host: bar.com
+    forwardedPorts:
+      1234:
+        host: one.bar.com
+        port: 1234
+      5678:
+        host: two.bar.com
+        port: 5678
+    socks5Port: 1081
+    username: mrbar
