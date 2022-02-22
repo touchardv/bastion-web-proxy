@@ -7,6 +7,7 @@ import (
 	"os"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/touchardv/bastion-web-proxy/config"
 
 	"golang.org/x/crypto/ssh"
@@ -68,9 +69,20 @@ func (c *sshConnection) dial() error {
 		client, err := ssh.Dial("tcp", fmt.Sprint(c.host, ":22"), c.cfg)
 		if err == nil {
 			c.client = client
+			go c.watchdog()
 		}
 	}
 	return err
+}
+
+func (c *sshConnection) watchdog() {
+	err := c.client.Wait()
+
+	c.mux.Lock()
+	defer c.mux.Unlock()
+	log.Warn("SSH Connection closed: ", err)
+	c.client.Close()
+	c.client = nil
 }
 
 func (c *sshConnection) resolve(ctx context.Context, host string) ([]net.IP, error) {
