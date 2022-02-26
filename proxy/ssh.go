@@ -15,6 +15,7 @@ import (
 )
 
 type sshConnection struct {
+	name   string
 	host   string
 	cfg    *ssh.ClientConfig
 	client *ssh.Client
@@ -23,6 +24,7 @@ type sshConnection struct {
 
 func newSSHConnection(cfg config.SSHProxy) *sshConnection {
 	return &sshConnection{
+		name: cfg.Name,
 		host: cfg.Host,
 		cfg: &ssh.ClientConfig{
 			User:            cfg.Username,
@@ -32,9 +34,12 @@ func newSSHConnection(cfg config.SSHProxy) *sshConnection {
 }
 
 func (c *sshConnection) Close() {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
 	if c.client != nil {
 		c.client.Close()
-		c.client = nil
+		log.Info("ssh connection down - ", c.name)
 	}
 }
 
@@ -68,6 +73,7 @@ func (c *sshConnection) dial() error {
 		}
 		client, err := ssh.Dial("tcp", fmt.Sprint(c.host, ":22"), c.cfg)
 		if err == nil {
+			log.Info("ssh connection up - ", c.name)
 			c.client = client
 			go c.watchdog()
 		}
@@ -78,11 +84,8 @@ func (c *sshConnection) dial() error {
 func (c *sshConnection) watchdog() {
 	err := c.client.Wait()
 
-	c.mux.Lock()
-	defer c.mux.Unlock()
-	log.Warn("SSH Connection closed: ", err)
-	c.client.Close()
-	c.client = nil
+	log.Errorf("ssh connection error - %s : %s", c.name, err)
+	c.Close()
 }
 
 func (c *sshConnection) resolve(ctx context.Context, host string) ([]net.IP, error) {

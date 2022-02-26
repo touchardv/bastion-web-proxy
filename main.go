@@ -1,11 +1,6 @@
 package main
 
 import (
-	"context"
-	"os"
-	"os/signal"
-	"syscall"
-
 	"github.com/touchardv/bastion-web-proxy/config"
 	"github.com/touchardv/bastion-web-proxy/proxy"
 
@@ -37,18 +32,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ctx, cancelFunc := context.WithCancel(context.Background())
 	proxy.Configure(cfg)
-
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-		<-c
-		cancelFunc()
-		proxy.Stop()
-	}()
-
-	proxy.Run(ctx)
+	proxy.Run()
 
 	log.Info("...Stopped")
 	log.Exit(0)

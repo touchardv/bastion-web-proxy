@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -20,13 +19,11 @@ func TestLifecycle(t *testing.T) {
 		},
 	}
 
-	ctx, cancelFunc := context.WithCancel(context.Background())
 	go func() {
 		time.Sleep(1 * time.Second)
-		cancelFunc()
 		Stop()
 	}()
 
 	Configure(cfg)
-	Run(ctx)
+	Run()
 }

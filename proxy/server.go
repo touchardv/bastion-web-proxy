@@ -3,7 +3,10 @@ package proxy
 import (
 	"context"
 	"net/http"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/touchardv/bastion-web-proxy/config"
@@ -12,6 +15,8 @@ import (
 var (
 	httpServer *http.Server
 	sshProxies map[string]*sshproxy
+	ctx        context.Context
+	cancelFunc context.CancelFunc
 	wg         sync.WaitGroup
 )
 
@@ -21,11 +26,24 @@ func Configure(cfg config.Config) {
 	for _, c := range cfg.SSHProxies {
 		sshProxies[c.Name] = NewSSHProxy(c)
 	}
+	ctx, cancelFunc = context.WithCancel(context.Background())
 }
 
-func Run(ctx context.Context) {
+func Run() {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+		select {
+		case <-c:
+			Stop()
+		case <-ctx.Done():
+		}
+	}()
+
+	wg.Add(len(sshProxies))
 	for _, s := range sshProxies {
-		wg.Add(1)
 		go func(p *sshproxy) {
 			defer wg.Done()
 			log.Debug("Starting: ssh proxy - ", p.cfg.Name)
@@ -49,6 +67,7 @@ func Stop() {
 	log.Debug("Stopping: http server")
 	StopHTTPServer()
 
+	cancelFunc()
 	for _, p := range sshProxies {
 		log.Debug("Stopping: ssh proxy - ", p.cfg.Name)
 		p.Stop()

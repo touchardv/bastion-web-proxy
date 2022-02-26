@@ -32,8 +32,8 @@ func NewSSHProxy(cfg config.SSHProxy) *sshproxy {
 }
 
 func (s *sshproxy) Run(ctx context.Context) {
+	s.wg.Add(len(s.cfg.ForwardedPorts))
 	for localPort, remoteServer := range s.cfg.ForwardedPorts {
-		s.wg.Add(1)
 		go func(localPort uint, remoteServer config.RemoteServer) {
 			defer s.wg.Done()
 			log.Debugf("Starting forward server: %d -> %s:%d", localPort, remoteServer.Host, remoteServer.Port)
@@ -51,6 +51,7 @@ func (s *sshproxy) Run(ctx context.Context) {
 	}()
 
 	s.wg.Wait()
+	s.sshConnection.Close()
 }
 
 func (s *sshproxy) startForwardServer(ctx context.Context, localPort uint, remoteServer config.RemoteServer) {
@@ -88,8 +89,6 @@ func (s *sshproxy) Stop() {
 		log.Debugf("Stopping forward server: %d -> %s:%d", localPort, remoteServer.Host, remoteServer.Port)
 		s.fwdListeners[localPort].Close()
 	}
-
-	s.sshConnection.Close()
 }
 
 func (s *sshproxy) handlePortForwardConnect(localPort uint, inConn net.Conn) {
