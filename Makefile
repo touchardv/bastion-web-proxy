@@ -1,5 +1,7 @@
-BINARY := bation-http-proxy
+BINARY := bastion-web-proxy
 BUILD_DIR := $(shell pwd)/build
+GOARCH := $(shell go env GOARCH)
+GOOS := $(shell go env GOOS)
 SOURCES = $(shell find . -name '*.go')
 
 .PHONY: build
@@ -14,6 +16,10 @@ $(BUILD_DIR)/$(BINARY): $(BUILD_DIR) $(SOURCES)
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
+
+release: $(BUILD_DIR)/$(BINARY)
+	cd $(BUILD_DIR) && shasum -a 512 $(BINARY) >$(BINARY).shasum512
+	cd $(BUILD_DIR) && tar cvzf $(BINARY)-$(GOOS)-$(GOARCH).tgz $(BINARY) $(BINARY).shasum512
 
 run: $(BUILD_DIR)/$(BINARY)
 	$(BUILD_DIR)/$(BINARY) --log-level debug
