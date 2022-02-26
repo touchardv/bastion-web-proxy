@@ -83,7 +83,7 @@ workflows:
             - run: gh release upload $CIRCLE_TAG /tmp/workspace/bastion-web-proxy-*.tgz
           context:
             - default
-          tag: $CIRCLE_TAG
+          tag: ${CIRCLE_TAG:-latest}
           requires:
             - build-and-release (linux/amd64)
             - build-and-release (darwin/amd64)
