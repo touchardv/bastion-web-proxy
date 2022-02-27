@@ -42,13 +42,15 @@ func (s *sshproxy) Run(ctx context.Context) {
 		}(localPort, remoteServer)
 	}
 
-	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
-		log.Debug("Starting: socks5 server - ", s.cfg.Name)
-		s.startSocks5Server(ctx)
-		log.Debug("Stopped: socks5 server - ", s.cfg.Name)
-	}()
+	if s.cfg.Socks5Port != 0 {
+		s.wg.Add(1)
+		go func() {
+			defer s.wg.Done()
+			log.Debug("Starting: socks5 server - ", s.cfg.Name)
+			s.startSocks5Server(ctx)
+			log.Debug("Stopped: socks5 server - ", s.cfg.Name)
+		}()
+	}
 
 	s.wg.Wait()
 	s.sshConnection.Close()
@@ -82,8 +84,10 @@ func (s *sshproxy) startForwardServer(ctx context.Context, localPort uint, remot
 }
 
 func (s *sshproxy) Stop() {
-	log.Debug("Stopping: socks5 server - ", s.cfg.Name)
-	s.socksListener.Close()
+	if s.cfg.Socks5Port != 0 {
+		log.Debug("Stopping: socks5 server - ", s.cfg.Name)
+		s.socksListener.Close()
+	}
 
 	for localPort, remoteServer := range s.cfg.ForwardedPorts {
 		log.Debugf("Stopping forward server: %d -> %s:%d", localPort, remoteServer.Host, remoteServer.Port)
