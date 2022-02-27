@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  github-cli: circleci/github-cli@2.0.0
+  github-cli: circleci/github-cli@2.1.0
 
 build_filter: &build_filter
   filters:
@@ -45,6 +45,19 @@ jobs:
           paths:
             - bastion-web-proxy-*.tgz
 
+  release-to-github:
+    docker:
+      - image: cimg/base:2022.02
+    environment:
+      GIT_TAG: << pipeline.git.tag >>
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - github-cli/setup
+      - run:
+          command: >
+            gh release upload $GIT_TAG /tmp/workspace/bastion-web-proxy-*.tgz
+
 workflows:
   version: 2
   build-workflow:
@@ -73,17 +86,11 @@ workflows:
           requires:
             - build-and-test
 
-      - github-cli/release:
+      - release-to-github:
           <<: *release_filter
           name: release-to-github
-          pre-steps:
-            - attach_workspace:
-                at: /tmp/workspace
-          post-steps:
-            - run: gh release upload $CIRCLE_TAG /tmp/workspace/bastion-web-proxy-*.tgz
           context:
             - default
-          tag: ${CIRCLE_TAG:-latest}
           requires:
             - build-and-release (linux/amd64)
             - build-and-release (darwin/amd64)
