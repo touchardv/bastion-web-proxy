@@ -51,6 +51,7 @@ jobs:
     environment:
       GIT_TAG: << pipeline.git.tag >>
     steps:
+      - checkout
       - attach_workspace:
           at: /tmp/workspace
       - github-cli/setup
