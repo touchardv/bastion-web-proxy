@@ -25,8 +25,17 @@ See `config/config.yaml.example` for an example.
 
 ## Running
 
-In a shell, execute: `make run`
+Using this Git repository, in a shell, execute: `make run`
 
+or
+
+Using the release tarball, installed in your PATH: `bastion-web-proxy`
+
+```
+Usage of bastion-web-proxy:
+      --config-location string   The path to the directory where the configuration file is stored. (default ".")
+      --log-level string         The logging level (trace, debug, info...) (default "info")
+```
 
 ## TODOs
 
