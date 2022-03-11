@@ -20,6 +20,7 @@ type sshproxy struct {
 	sshConnection *sshConnection
 	fwdListeners  map[uint]*net.TCPListener
 	connCount     int32
+	mutex         sync.Mutex
 	wg            sync.WaitGroup
 }
 
@@ -64,7 +65,9 @@ func (s *sshproxy) startForwardServer(ctx context.Context, localPort uint, remot
 		return
 	}
 	defer listener.Close()
+	s.mutex.Lock()
 	s.fwdListeners[localPort] = listener
+	s.mutex.Unlock()
 
 	log.Info("forward server listening on: ", localAddr)
 	for {
@@ -84,6 +87,9 @@ func (s *sshproxy) startForwardServer(ctx context.Context, localPort uint, remot
 }
 
 func (s *sshproxy) Stop() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
 	if s.cfg.Socks5Port != 0 {
 		log.Debug("Stopping: socks5 server - ", s.cfg.Name)
 		s.socksListener.Close()
