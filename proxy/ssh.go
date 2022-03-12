@@ -30,6 +30,7 @@ func newSSHConnection(cfg config.SSHProxy) *sshConnection {
 		cfg: &ssh.ClientConfig{
 			User:            cfg.Username,
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Timeout:         30 * time.Second,
 		},
 	}
 }

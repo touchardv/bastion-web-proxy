@@ -80,7 +80,6 @@ func (s *sshproxy) startForwardServer(ctx context.Context, localPort uint, remot
 				log.Error("Error accepting connection: ", err)
 				return
 			}
-			log.Debug("New connection from: ", inConn.RemoteAddr())
 			go s.handlePortForwardConnect(localPort, inConn)
 		}
 	}
@@ -106,13 +105,14 @@ func (s *sshproxy) handlePortForwardConnect(localPort uint, inConn net.Conn) {
 
 	ctx := context.Background()
 	remoteServer := s.cfg.ForwardedPorts[localPort]
+	log.Debugf("%s -> %s: accepted", inConn.RemoteAddr(), remoteServer.String())
 	outConn, err := s.sshConnection.Tunnel(ctx, remoteServer)
 	if err != nil {
-		log.Error(err)
+		log.Errorf("%s -> %s: %s", inConn.RemoteAddr(), remoteServer.String(), err)
 		return
 	}
 	defer outConn.Close()
-	log.Info("Connected: ", remoteServer.String())
+	log.Debugf("%s -> %s: connected", inConn.RemoteAddr(), remoteServer.String())
 	atomic.AddInt32(&s.connCount, 1)
 	defer atomic.AddInt32(&s.connCount, -1)
 
@@ -124,9 +124,9 @@ func (s *sshproxy) handlePortForwardConnect(localPort uint, inConn net.Conn) {
 	for i := 0; i < 2; i++ {
 		e := <-errCh
 		if e != nil {
-			log.Warn(e)
+			log.Warnf("%s -> %s: %s", inConn.RemoteAddr(), remoteServer.String(), e)
 			return
 		}
 	}
-	log.Info("Connection complete: ", inConn.RemoteAddr())
+	log.Debugf("%s -> %s: disconnected", inConn.RemoteAddr(), remoteServer.String())
 }
