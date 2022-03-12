@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"sync"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/touchardv/bastion-web-proxy/config"
@@ -39,6 +40,7 @@ func (c *sshConnection) Close() {
 
 	if c.client != nil {
 		c.client.Close()
+		c.client = nil
 		log.Info("ssh connection down - ", c.name)
 	}
 }
@@ -50,6 +52,7 @@ func (c *sshConnection) Tunnel(ctx context.Context, server config.RemoteServer) 
 		if err == nil {
 			return c.client.Dial("tcp", fmt.Sprint(addrs[0], ":", server.Port))
 		}
+		return nil, err
 	}
 	return nil, err
 }
@@ -77,6 +80,7 @@ func (c *sshConnection) dial() error {
 			c.client = client
 			go c.watchdog()
 		}
+		return err
 	}
 	return err
 }
