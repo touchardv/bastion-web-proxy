@@ -13,7 +13,6 @@ import (
 func NewHTTPServer(cfg config.Server) *http.Server {
 	path := fmt.Sprint("/", cfg.PACFile)
 	http.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		log.Infof("%s %s", r.Method, r.URL)
 		http.ServeFile(w, r, cfg.PACFile)
 	})
 	return &http.Server{
