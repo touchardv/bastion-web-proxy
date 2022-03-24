@@ -47,6 +47,9 @@ func (c *sshConnection) Close() {
 }
 
 func (c *sshConnection) Tunnel(ctx context.Context, server config.RemoteServer) (net.Conn, error) {
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
 	err := c.dial()
 	if err == nil {
 		addrs, err := c.resolve(ctx, server.Host)
@@ -59,9 +62,6 @@ func (c *sshConnection) Tunnel(ctx context.Context, server config.RemoteServer) 
 }
 
 func (c *sshConnection) dial() error {
-	c.mux.Lock()
-	defer c.mux.Unlock()
-
 	if c.client != nil {
 		return nil
 	}
