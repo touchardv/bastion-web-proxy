@@ -66,6 +66,7 @@ func (s *sshproxy) handleSocks5Connect(ctx context.Context, writer io.Writer, re
 	}
 	defer target.Close()
 	log.Info("Connected: ", request.RawDestAddr.FQDN)
+	defer log.Info("Disconnected: ", request.RawDestAddr.FQDN)
 	atomic.AddInt32(&s.connCount, 1)
 	defer atomic.AddInt32(&s.connCount, -1)
 
@@ -85,7 +86,6 @@ func (s *sshproxy) handleSocks5Connect(ctx context.Context, writer io.Writer, re
 			return e
 		}
 	}
-	log.Info("Disconnected")
 	return nil
 }
 
