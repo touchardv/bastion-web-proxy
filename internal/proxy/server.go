@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/touchardv/bastion-web-proxy/config"
+	"github.com/touchardv/bastion-web-proxy/internal/config"
 )
 
 var (

@@ -8,11 +8,10 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/touchardv/bastion-web-proxy/config"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/things-go/go-socks5"
 	"github.com/things-go/go-socks5/statute"
+	"github.com/touchardv/bastion-web-proxy/internal/config"
 )
 
 func (s *sshproxy) startSocks5Server(ctx context.Context) {

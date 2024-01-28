@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/touchardv/bastion-web-proxy/config"
-	"github.com/touchardv/bastion-web-proxy/proxy"
+	"github.com/touchardv/bastion-web-proxy/internal/config"
+	"github.com/touchardv/bastion-web-proxy/internal/proxy"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"

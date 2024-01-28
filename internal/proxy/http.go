@@ -7,7 +7,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/touchardv/bastion-web-proxy/config"
+	"github.com/touchardv/bastion-web-proxy/internal/config"
 )
 
 func NewHTTPServer(cfg config.Server) *http.Server {

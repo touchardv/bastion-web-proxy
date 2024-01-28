@@ -11,7 +11,7 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 $(BUILD_DIR)/$(BINARY): $(BUILD_DIR) $(SOURCES)
-	go build -o $(BUILD_DIR)/$(BINARY) .
+	go build -o $(BUILD_DIR)/$(BINARY) ./cmd/bastion-web-proxy
 
 .PHONY: clean
 clean:

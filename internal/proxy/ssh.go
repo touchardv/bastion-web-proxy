@@ -9,7 +9,7 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/touchardv/bastion-web-proxy/config"
+	"github.com/touchardv/bastion-web-proxy/internal/config"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/touchardv/bastion-web-proxy/config"
+	"github.com/touchardv/bastion-web-proxy/internal/config"
 
 	log "github.com/sirupsen/logrus"
 	socks5 "github.com/things-go/go-socks5"
