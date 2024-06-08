@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v2"
@@ -47,7 +47,7 @@ func Retrieve(location string, cfg interface{}) error {
 
 func retrieve(location string, name string, cfg interface{}) error {
 	filename := filepath.Join(location, name)
-	content, err := ioutil.ReadFile(filename)
+	content, err := os.ReadFile(filename)
 	if err == nil {
 		err = yaml.Unmarshal(content, cfg)
 	}
