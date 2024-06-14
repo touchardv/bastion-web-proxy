@@ -25,30 +25,32 @@ type sshproxy struct {
 }
 
 func NewSSHProxy(cfg config.SSHProxy) *sshproxy {
-	return &sshproxy{
+	p := &sshproxy{
 		cfg:           cfg,
 		sshConnection: newSSHConnection(cfg),
 		fwdListeners:  make(map[uint]*net.TCPListener),
 	}
+	p.socksServer = newSocks5Server(p)
+	return p
 }
 
-func (s *sshproxy) Run(ctx context.Context) {
+func (s *sshproxy) Run(ctx context.Context, localAddress string) {
 	s.wg.Add(len(s.cfg.ForwardedPorts))
 	for localPort, remoteServer := range s.cfg.ForwardedPorts {
 		go func(localPort uint, remoteServer config.RemoteServer) {
 			defer s.wg.Done()
 			log.Debugf("Starting forward server: %d -> %s:%d", localPort, remoteServer.Host, remoteServer.Port)
-			s.startForwardServer(ctx, localPort, remoteServer)
+			s.startForwardServer(ctx, localAddress, localPort, remoteServer)
 			log.Debugf("Stopped forward server: %d -> %s:%d", localPort, remoteServer.Host, remoteServer.Port)
 		}(localPort, remoteServer)
 	}
 
-	if s.cfg.Socks5Port != 0 {
+	if s.cfg.Socks5Enabled {
 		s.wg.Add(1)
 		go func() {
 			defer s.wg.Done()
 			log.Debug("Starting: socks5 server - ", s.cfg.Name)
-			s.startSocks5Server(ctx)
+			s.startSocks5Server(ctx, localAddress)
 			log.Debug("Stopped: socks5 server - ", s.cfg.Name)
 		}()
 	}
@@ -57,8 +59,8 @@ func (s *sshproxy) Run(ctx context.Context) {
 	s.sshConnection.Close()
 }
 
-func (s *sshproxy) startForwardServer(ctx context.Context, localPort uint, remoteServer config.RemoteServer) {
-	localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprint("127.0.0.1:", localPort))
+func (s *sshproxy) startForwardServer(ctx context.Context, localAddress string, localPort uint, remoteServer config.RemoteServer) {
+	localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprint(localAddress, ":", localPort))
 	listener, err := net.ListenTCP("tcp", localAddr)
 	if err != nil {
 		log.Error("Error listening: ", err)
@@ -89,7 +91,7 @@ func (s *sshproxy) Stop() {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	if s.cfg.Socks5Port != 0 {
+	if s.cfg.Socks5Enabled {
 		log.Debug("Stopping: socks5 server - ", s.cfg.Name)
 		s.socksListener.Close()
 	}

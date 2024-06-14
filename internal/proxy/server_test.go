@@ -11,7 +11,8 @@ import (
 func TestLifecycle(t *testing.T) {
 	logrus.SetLevel(logrus.DebugLevel)
 	cfg := config.Config{
-		HTTPServer: config.Server{Address: "127.0.0.1", Port: 0},
+		Address:    "127.0.0.1",
+		HTTPServer: config.Server{Port: 0},
 		SSHProxies: []config.SSHProxy{
 			{Name: "test", Host: "127.0.0.1", Username: "foo", ForwardedPorts: config.ForwardedPorts{
 				12345: config.RemoteServer{Host: "target", Port: 1234},

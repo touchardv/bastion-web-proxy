@@ -12,4 +12,4 @@ USER 1001
 
 ENTRYPOINT [ "/bastion-web-proxy" ]
 
-CMD [ "--config-location", "/etc/bastion-web-proxy" ]
+CMD [ "--log-level", "debug", "--config-location", "/etc/bastion-web-proxy" ]

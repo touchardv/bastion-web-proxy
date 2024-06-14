@@ -11,7 +11,7 @@ import (
 const DefaultFilename = "config.yaml"
 
 type Server struct {
-	Address string `yaml:"address"`
+	Enabled bool   `yaml:"enabled"`
 	Port    int    `yaml:"port"`
 	PACFile string `yaml:"pacFile"`
 }
@@ -31,11 +31,13 @@ type SSHProxy struct {
 	Name           string         `yaml:"name"`
 	Host           string         `yaml:"host"`
 	ForwardedPorts ForwardedPorts `yaml:"forwardedPorts"`
+	Socks5Enabled  bool           `yaml:"socks5Enabled"`
 	Socks5Port     int            `yaml:"socks5Port"`
 	Username       string         `yaml:"username"`
 }
 
 type Config struct {
+	Address    string     `yaml:"address"`
 	HTTPServer Server     `yaml:"httpServer"`
 	SSHProxies []SSHProxy `yaml:"sshProxies"`
 }

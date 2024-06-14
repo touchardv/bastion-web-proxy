@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	address    string
 	httpServer *http.Server
 	sshProxies map[string]*sshproxy
 	ctx        context.Context
@@ -21,7 +22,10 @@ var (
 )
 
 func Configure(cfg config.Config) {
-	httpServer = NewHTTPServer(cfg.HTTPServer)
+	address = cfg.Address
+	if cfg.HTTPServer.Enabled {
+		httpServer = NewHTTPServer(cfg.Address, cfg.HTTPServer)
+	}
 	sshProxies = make(map[string]*sshproxy)
 	for _, c := range cfg.SSHProxies {
 		sshProxies[c.Name] = NewSSHProxy(c)
@@ -47,25 +51,29 @@ func Run() {
 		go func(p *sshproxy) {
 			defer wg.Done()
 			log.Debug("Starting: ssh proxy - ", p.cfg.Name)
-			p.Run(ctx)
+			p.Run(ctx, address)
 			log.Debug("Stopped: ssh proxy - ", p.cfg.Name)
 		}(s)
 	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		log.Debug("Starting: http server")
-		RunHTTPServer()
-		log.Debug("Stopped: http server")
-	}()
+	if httpServer != nil {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			log.Debug("Starting: http server")
+			RunHTTPServer()
+			log.Debug("Stopped: http server")
+		}()
+	}
 
 	wg.Wait()
 }
 
 func Stop() {
-	log.Debug("Stopping: http server")
-	StopHTTPServer()
+	if httpServer != nil {
+		log.Debug("Stopping: http server")
+		StopHTTPServer()
+	}
 
 	cancelFunc()
 	for _, p := range sshProxies {

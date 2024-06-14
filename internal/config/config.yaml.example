@@ -1,10 +1,12 @@
+address: 127.0.0.1
 httpServer:
-    address: 127.0.0.1
+    enabled: true
     port: 8080
     pacFile: proxy.pac
 sshProxies:
   - name: foo
     host: foo.com
+    socks5Enabled: true
     socks5Port: 1080
     username: mrfoo
 

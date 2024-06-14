@@ -14,14 +14,17 @@ import (
 	"github.com/touchardv/bastion-web-proxy/internal/config"
 )
 
-func (s *sshproxy) startSocks5Server(ctx context.Context) {
-	localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprint("127.0.0.1:", s.cfg.Socks5Port))
-	log.Info("socks5 server listening on: ", localAddr)
-	s.socksServer = socks5.NewServer(
+func newSocks5Server(s *sshproxy) *socks5.Server {
+	return socks5.NewServer(
 		socks5.WithLogger(s),
 		socks5.WithResolver(s),
 		socks5.WithConnectHandle(s.handleSocks5Connect),
 	)
+}
+
+func (s *sshproxy) startSocks5Server(ctx context.Context, localAddress string) {
+	localAddr, _ := net.ResolveTCPAddr("tcp", fmt.Sprint(localAddress, ":", s.cfg.Socks5Port))
+	log.Info("socks5 server listening on: ", localAddr)
 
 	listener, err := net.ListenTCP("tcp", localAddr)
 	if err != nil {
