@@ -30,6 +30,7 @@ type ForwardedPorts map[uint]RemoteServer
 type SSHProxy struct {
 	Name           string         `yaml:"name"`
 	Host           string         `yaml:"host"`
+	Port           int            `yaml:"port"`
 	ForwardedPorts ForwardedPorts `yaml:"forwardedPorts"`
 	Socks5Enabled  bool           `yaml:"socks5Enabled"`
 	Socks5Port     int            `yaml:"socks5Port"`

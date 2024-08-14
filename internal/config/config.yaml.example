@@ -12,6 +12,7 @@ sshProxies:
 
   - name: bar
     host: bar.com
+    port: 6666
     forwardedPorts:
       1234:
         host: one.bar.com

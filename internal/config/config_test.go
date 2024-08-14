@@ -19,12 +19,12 @@ func TestRetrieving(t *testing.T) {
 	assert.Equal(t, "proxy.pac", cfg.HTTPServer.PACFile)
 
 	assert.Equal(t, 2, len(cfg.SSHProxies))
-	assert.Equal(t, SSHProxy{Name: "foo", Host: "foo.com", ForwardedPorts: nil,
+	assert.Equal(t, SSHProxy{Name: "foo", Host: "foo.com", Port: 0, ForwardedPorts: nil,
 		Socks5Enabled: true,
 		Socks5Port:    1080, Username: "mrfoo"},
 		cfg.SSHProxies[0])
 
-	assert.Equal(t, SSHProxy{Name: "bar", Host: "bar.com", ForwardedPorts: map[uint]RemoteServer{
+	assert.Equal(t, SSHProxy{Name: "bar", Host: "bar.com", Port: 6666, ForwardedPorts: map[uint]RemoteServer{
 		1234: {Host: "one.bar.com", Port: 1234},
 		5678: {Host: "two.bar.com", Port: 5678}},
 		Socks5Enabled: false,

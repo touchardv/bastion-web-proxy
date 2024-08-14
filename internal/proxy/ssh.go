@@ -18,6 +18,7 @@ import (
 type sshConnection struct {
 	name   string
 	host   string
+	port   int
 	cfg    *ssh.ClientConfig
 	client *ssh.Client
 	mux    sync.Mutex
@@ -27,6 +28,7 @@ func newSSHConnection(cfg config.SSHProxy) *sshConnection {
 	return &sshConnection{
 		name: cfg.Name,
 		host: cfg.Host,
+		port: cfg.Port,
 		cfg: &ssh.ClientConfig{
 			User:            cfg.Username,
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
@@ -75,7 +77,7 @@ func (c *sshConnection) dial() error {
 		c.cfg.Auth = []ssh.AuthMethod{
 			ssh.PublicKeysCallback(agentClient.Signers),
 		}
-		client, err := ssh.Dial("tcp", fmt.Sprint(c.host, ":22"), c.cfg)
+		client, err := ssh.Dial("tcp", toDialAddress(c), c.cfg)
 		if err == nil {
 			log.Info("ssh connection up - ", c.name)
 			c.client = client
@@ -84,6 +86,14 @@ func (c *sshConnection) dial() error {
 		return err
 	}
 	return err
+}
+
+func toDialAddress(c *sshConnection) string {
+	port := 22
+	if c.port > 0 {
+		port = c.port
+	}
+	return fmt.Sprint(c.host, ":", port)
 }
 
 func (c *sshConnection) watchdog() {
