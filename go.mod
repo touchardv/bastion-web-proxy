@@ -1,6 +1,6 @@
 module github.com/touchardv/bastion-web-proxy
 
-go 1.21
+go 1.22
 
 require golang.org/x/crypto v0.24.0
 
