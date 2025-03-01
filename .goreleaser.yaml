@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - goarch:
+      - amd64
+      - arm64
+    goos:
+      - linux
+    main: ./cmd/bastion-web-proxy
+
+dockers:
+  - build_flag_templates:
+      - "--build-arg=BINARY=bastion-web-proxy"
+      - "--build-arg=BUILD_DIR=/"
+      - "--platform=linux/amd64"
+    dockerfile: deployment/Dockerfile
+    goarch: amd64
+    ids:
+      - bastion-web-proxy
+    image_templates:
+      - "quay.io/touchardv/bastion-web-proxy:v{{ .Version }}-amd64"
+    use: buildx
+
+  - build_flag_templates:
+      - "--build-arg=BINARY=bastion-web-proxy"
+      - "--build-arg=BUILD_DIR=/"
+      - "--platform=linux/arm64"
+    dockerfile: deployment/Dockerfile
+    goarch: arm64
+    ids:
+      - bastion-web-proxy
+    image_templates:
+      - "quay.io/touchardv/bastion-web-proxy:v{{ .Version }}-arm64"
+    use: buildx
+
+docker_manifests:
+  - image_templates:
+      - "quay.io/touchardv/bastion-web-proxy:v{{ .Version }}-amd64"
+      - "quay.io/touchardv/bastion-web-proxy:v{{ .Version }}-arm64"
+    name_template: "quay.io/touchardv/bastion-web-proxy:v{{ .Version }}"
